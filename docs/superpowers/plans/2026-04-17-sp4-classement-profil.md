@@ -1,3 +1,230 @@
+# Canari — Sous-projet 4 : Classement + Profil Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Construire les deux écrans finaux de l'app — `app/classement.tsx` (top 20 des meilleurs scores, ligne surlignée pour l'utilisateur connecté) et `app/profil.tsx` (avatar initiales, streak, grille de badges, historique 10 derniers quiz, bouton connexion/déconnexion).
+
+**Architecture:** Deux écrans indépendants, chacun avec ses propres fetch Supabase au mount. Pas de lib partagée nécessaire. Le classement agrège les scores côté client (fetch 100 lignes, déduplication par user_id, top 20). Le profil fait 3 requêtes en parallèle (profile, badges, quiz_scores). L'auth dans le profil utilise `supabase.auth.signInWithPassword` + `signUp` avec un formulaire email/mot de passe inline, et `signOut` si déjà connecté.
+
+**Tech Stack:** Expo SDK 54, Expo Router v4, NativeWind v4, Supabase (tables `quiz_scores`, `profiles`, `badges`), `BADGE_DEFINITIONS` depuis `lib/badges.ts`, types `Profile`, `QuizScore`, `Badge`, `BadgeKey`, `BadgeDefinition` depuis `lib/types.ts`
+
+> **Note :** Pas de tests automatisés. La validation se fait visuellement via `npx expo start`.
+
+---
+
+## Fichiers créés / modifiés
+
+| Fichier | Rôle |
+|---------|------|
+| `app/classement.tsx` | Remplacer le placeholder — top 20 + ligne surlignée |
+| `app/profil.tsx` | Remplacer le placeholder — avatar, streak, badges, historique, auth |
+
+---
+
+### Task 1 : Écran Classement (`app/classement.tsx`)
+
+**Files:**
+- Modify: `app/classement.tsx` (remplacer le placeholder)
+
+- [ ] **Step 1 : Écrire `app/classement.tsx`**
+
+```tsx
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+interface LeaderboardEntry {
+  userId: string;
+  username: string;
+  bestScore: number;
+  lastPlayed: string;
+}
+
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" });
+}
+
+export default function ClassementScreen() {
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserEntry, setCurrentUserEntry] = useState<(LeaderboardEntry & { rank: number }) | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUserId(session?.user.id ?? null);
+    });
+    loadLeaderboard();
+  }, []);
+
+  const loadLeaderboard = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("quiz_scores")
+        .select("score, played_at, user_id, profiles(username)")
+        .order("score", { ascending: false })
+        .limit(100);
+
+      if (error || !data) return;
+
+      const seen = new Set<string>();
+      const deduped: LeaderboardEntry[] = [];
+      for (const row of data) {
+        if (seen.has(row.user_id)) continue;
+        seen.add(row.user_id);
+        const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+        deduped.push({
+          userId: row.user_id,
+          username: (profile as { username: string } | null)?.username ?? "Anonyme",
+          bestScore: row.score,
+          lastPlayed: row.played_at,
+        });
+      }
+
+      const top20 = deduped.slice(0, 20);
+      setEntries(top20);
+
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const uid = session?.user.id;
+        if (!uid) return;
+        const userIndex = deduped.findIndex((e) => e.userId === uid);
+        if (userIndex >= 20) {
+          setCurrentUserEntry({ ...deduped[userIndex], rank: userIndex + 1 });
+        }
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <View className="flex-1 bg-stone-900">
+      <View className="pt-14 pb-3 px-4 flex-row items-center gap-3 border-b border-stone-800">
+        <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+          <Text className="text-amber-500 text-lg">‹</Text>
+        </TouchableOpacity>
+        <Text className="text-white text-xl font-bold flex-1">Classement</Text>
+        <Text className="text-stone-500 text-sm">Top 20</Text>
+      </View>
+
+      {loading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color="#f59e0b" size="large" />
+        </View>
+      ) : entries.length === 0 ? (
+        <View className="flex-1 items-center justify-center px-8">
+          <Text className="text-4xl mb-4">🏆</Text>
+          <Text className="text-white text-lg font-semibold text-center mb-2">
+            Aucun score pour l'instant
+          </Text>
+          <Text className="text-stone-400 text-sm text-center">
+            Joue un quiz pour apparaître dans le classement !
+          </Text>
+        </View>
+      ) : (
+        <ScrollView className="flex-1" bounces={false}>
+          <View className="flex-row px-4 pt-3 pb-2 border-b border-stone-800">
+            <Text className="text-stone-500 text-xs w-10 text-center">#</Text>
+            <Text className="text-stone-500 text-xs flex-1 ml-2">Joueur</Text>
+            <Text className="text-stone-500 text-xs w-14 text-right">Score</Text>
+            <Text className="text-stone-500 text-xs w-20 text-right">Date</Text>
+          </View>
+
+          {entries.map((entry, index) => {
+            const rank = index + 1;
+            const isMe = entry.userId === currentUserId;
+            const isTop3 = rank <= 3;
+            const medalEmoji = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
+
+            return (
+              <View
+                key={entry.userId}
+                className={`flex-row items-center px-4 py-3 border-b border-stone-800/60 ${isMe ? "bg-amber-500/10" : ""}`}
+              >
+                <View className="w-10 items-center">
+                  {medalEmoji ? (
+                    <Text className="text-base">{medalEmoji}</Text>
+                  ) : (
+                    <Text className={`text-sm font-bold ${isMe ? "text-amber-400" : "text-stone-500"}`}>
+                      {rank}
+                    </Text>
+                  )}
+                </View>
+                <View className="flex-1 ml-2">
+                  <Text
+                    className={`text-sm font-semibold ${isMe ? "text-amber-400" : "text-white"}`}
+                    numberOfLines={1}
+                  >
+                    {entry.username}{isMe ? " (moi)" : ""}
+                  </Text>
+                </View>
+                <View className="w-14 items-end">
+                  <Text className={`text-sm font-black ${isMe ? "text-amber-400" : isTop3 ? "text-amber-300" : "text-white"}`}>
+                    {entry.bestScore}<Text className="text-stone-500 font-normal text-xs">/10</Text>
+                  </Text>
+                </View>
+                <View className="w-20 items-end">
+                  <Text className="text-stone-500 text-xs">{formatDate(entry.lastPlayed)}</Text>
+                </View>
+              </View>
+            );
+          })}
+
+          {currentUserEntry && (
+            <>
+              <View className="py-2 items-center">
+                <Text className="text-stone-600 text-xs">· · ·</Text>
+              </View>
+              <View className="flex-row items-center px-4 py-3 bg-amber-500/10 border border-amber-500/20 mx-4 rounded-xl mb-4">
+                <View className="w-10 items-center">
+                  <Text className="text-amber-400 text-sm font-bold">{currentUserEntry.rank}</Text>
+                </View>
+                <View className="flex-1 ml-2">
+                  <Text className="text-amber-400 text-sm font-semibold" numberOfLines={1}>
+                    {currentUserEntry.username} (moi)
+                  </Text>
+                </View>
+                <View className="w-14 items-end">
+                  <Text className="text-amber-400 text-sm font-black">
+                    {currentUserEntry.bestScore}<Text className="text-stone-500 font-normal text-xs">/10</Text>
+                  </Text>
+                </View>
+                <View className="w-20 items-end">
+                  <Text className="text-stone-500 text-xs">{formatDate(currentUserEntry.lastPlayed)}</Text>
+                </View>
+              </View>
+            </>
+          )}
+
+          <View className="h-8" />
+        </ScrollView>
+      )}
+    </View>
+  );
+}
+```
+
+- [ ] **Step 2 : Commit**
+
+```bash
+cd /Users/I531480/SAPDevelop/git/canari
+git add app/classement.tsx
+git commit -m "feat: build leaderboard screen with top 20 and current user highlight"
+```
+
+---
+
+### Task 2 : Écran Profil (`app/profil.tsx`)
+
+**Files:**
+- Modify: `app/profil.tsx` (remplacer le placeholder)
+
+- [ ] **Step 1 : Écrire `app/profil.tsx`**
+
+```tsx
 import {
   View,
   Text,
@@ -13,7 +240,7 @@ import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { BADGE_DEFINITIONS } from "@/lib/badges";
-import type { Profile, Badge, QuizScore } from "@/lib/types";
+import type { Profile, Badge, QuizScore, BadgeKey } from "@/lib/types";
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -27,11 +254,7 @@ function getInitials(username: string | null): string {
   return username.slice(0, 2).toUpperCase();
 }
 
-interface AuthFormProps {
-  readonly onSuccess: () => void;
-}
-
-function AuthForm({ onSuccess }: AuthFormProps) {
+function AuthForm({ onSuccess }: { onSuccess: () => void }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -165,12 +388,7 @@ interface ProfileData {
   bestScore: number | null;
 }
 
-interface ConnectedProfileProps {
-  readonly userId: string;
-  readonly onSignOut: () => void;
-}
-
-function ConnectedProfile({ userId, onSignOut }: ConnectedProfileProps) {
+function ConnectedProfile({ userId, onSignOut }: { userId: string; onSignOut: () => void }) {
   const [data, setData] = useState<ProfileData>({ profile: null, badges: [], scores: [], bestScore: null });
   const [loading, setLoading] = useState(true);
 
@@ -208,7 +426,7 @@ function ConnectedProfile({ userId, onSignOut }: ConnectedProfileProps) {
   }
 
   const { profile, badges, scores, bestScore } = data;
-  const earnedKeys = new Set(badges.map((b) => b.badge_key));
+  const earnedKeys = new Set(badges.map((b) => b.badge_key as BadgeKey));
   const username = profile?.username ?? "Utilisateur";
   const streak = profile?.streak_count ?? 0;
 
@@ -233,8 +451,8 @@ function ConnectedProfile({ userId, onSignOut }: ConnectedProfileProps) {
           </View>
           <View className="flex-1 bg-stone-800 border border-stone-700 rounded-2xl p-4 items-center gap-1">
             <Text className="text-2xl">🏆</Text>
-            <Text className="text-white text-xl font-bold">
-              {bestScore === null ? "–" : `${bestScore}/10`}
+            <Text className="text-white text-2xl font-black">
+              {bestScore !== null ? `${bestScore}/10` : "–"}
             </Text>
             <Text className="text-stone-400 text-xs text-center">Meilleur score</Text>
           </View>
@@ -279,8 +497,7 @@ function ConnectedProfile({ userId, onSignOut }: ConnectedProfileProps) {
           ) : (
             <View className="gap-2">
               {scores.map((score) => {
-                const midOrLow = score.score >= 5 ? "#3b82f6" : "#ef4444";
-                const scoreColor = score.score >= 8 ? "#f59e0b" : midOrLow;
+                const scoreColor = score.score >= 8 ? "#f59e0b" : score.score >= 5 ? "#3b82f6" : "#ef4444";
                 return (
                   <View
                     key={score.id}
@@ -326,12 +543,6 @@ export default function ProfilScreen() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const authenticatedContent = session ? (
-    <ConnectedProfile userId={session.user.id} onSignOut={() => setSession(null)} />
-  ) : (
-    <AuthForm onSuccess={() => {/* session updated via onAuthStateChange */}} />
-  );
-
   return (
     <View className="flex-1 bg-stone-900">
       <View className="pt-14 pb-3 px-4 flex-row items-center gap-3 border-b border-stone-800">
@@ -341,11 +552,51 @@ export default function ProfilScreen() {
         <Text className="text-white text-xl font-bold flex-1">Profil</Text>
       </View>
 
-      {authChecked ? authenticatedContent : (
+      {!authChecked ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color="#f59e0b" />
         </View>
+      ) : session ? (
+        <ConnectedProfile userId={session.user.id} onSignOut={() => setSession(null)} />
+      ) : (
+        <AuthForm onSuccess={() => {/* session updated via onAuthStateChange */}} />
       )}
     </View>
   );
 }
+```
+
+- [ ] **Step 2 : Commit**
+
+```bash
+cd /Users/I531480/SAPDevelop/git/canari
+git add app/profil.tsx
+git commit -m "feat: build profile screen with auth form, badges grid, streak and quiz history"
+```
+
+---
+
+### Self-Review
+
+**Classement — couverture spec :**
+- ✅ Top 20 meilleurs scores (1 par utilisateur) : fetch 100 lignes, déduplication côté client, `slice(0, 20)`
+- ✅ Chaque ligne : rang, username, score, date
+- ✅ Ligne utilisateur connecté surlignée en amber si hors top 20
+- ✅ Bouton retour header
+- ✅ État vide géré
+- ✅ Médailles 🥇🥈🥉 pour les 3 premiers
+
+**Profil — couverture spec :**
+- ✅ Avatar initiales par défaut dans un cercle amber
+- ✅ Username + date d'inscription
+- ✅ 🔥 Série actuelle + meilleur score all-time
+- ✅ Grille de badges (grisés / colorés)
+- ✅ Historique 10 derniers quiz avec couleur de score
+- ✅ Formulaire email/mot de passe (login + signup) si non connecté
+- ✅ Bouton "Se déconnecter" si connecté
+- ✅ Bouton retour header
+
+**Type consistency :**
+- ✅ `Profile`, `Badge`, `QuizScore`, `BadgeKey` depuis `lib/types.ts`
+- ✅ `BADGE_DEFINITIONS` depuis `lib/badges.ts`
+- ✅ `Session` depuis `@supabase/supabase-js`
