@@ -1,22 +1,9 @@
-import { Text, View, StyleSheet } from 'react-native';
+import { View, Text } from "react-native";
 
-export default function Index() {
+export default function TestScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Canari</Text>
+    <View className="flex-1 items-center justify-center bg-stone-900">
+      <Text className="text-amber-500 text-2xl font-bold">NativeWind OK ✓</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1c1917',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    color: '#fff',
-    fontSize: 24,
-  },
-});
