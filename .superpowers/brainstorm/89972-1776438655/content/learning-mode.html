@@ -1,0 +1,156 @@
+<h2>Mode Apprentissage — Canari</h2>
+<p class="subtitle">Comment afficher les oiseaux à explorer ?</p>
+
+<div class="split">
+
+  <div class="mockup" data-choice="a" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="mockup-header">A — Grille de cartes avec filtres</div>
+    <div class="mockup-body" style="padding:0">
+      <div style="background:#1c1917;min-height:380px;border-radius:8px;overflow:hidden;font-size:12px;color:white">
+        <!-- Header -->
+        <div style="background:#292524;padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #3d3532">
+          <div style="font-size:16px">←</div>
+          <div style="font-weight:700">Apprendre</div>
+          <div style="margin-left:auto;background:#f59e0b22;color:#f59e0b;border-radius:6px;padding:4px 8px;font-size:10px">247 oiseaux</div>
+        </div>
+        <!-- Search -->
+        <div style="padding:10px 12px">
+          <div style="background:#292524;border-radius:8px;padding:8px 12px;color:#666;font-size:11px">🔍 Rechercher un oiseau...</div>
+        </div>
+        <!-- Filter chips -->
+        <div style="padding:0 12px 10px;display:flex;gap:6px;overflow-x:auto">
+          <div style="background:#f59e0b;color:#000;border-radius:20px;padding:4px 12px;font-size:10px;white-space:nowrap;font-weight:700">Tous</div>
+          <div style="background:#292524;border-radius:20px;padding:4px 12px;font-size:10px;white-space:nowrap">Passereaux</div>
+          <div style="background:#292524;border-radius:20px;padding:4px 12px;font-size:10px;white-space:nowrap">Rapaces</div>
+          <div style="background:#292524;border-radius:20px;padding:4px 12px;font-size:10px;white-space:nowrap">Aquatiques</div>
+          <div style="background:#292524;border-radius:20px;padding:4px 12px;font-size:10px;white-space:nowrap">Waders</div>
+        </div>
+        <!-- Grid -->
+        <div style="padding:0 12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div style="background:#292524;border-radius:10px;overflow:hidden">
+            <div style="height:60px;background:linear-gradient(135deg,#1e40af,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:28px;position:relative">
+              🐦
+              <div style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:#22c55e;border-radius:50%"></div>
+            </div>
+            <div style="padding:6px;font-size:9px;text-align:center">
+              <div style="font-weight:700">Moineau</div>
+              <div style="color:#aaa">Passereau</div>
+            </div>
+          </div>
+          <div style="background:#292524;border-radius:10px;overflow:hidden">
+            <div style="height:60px;background:linear-gradient(135deg,#064e3b,#059669);display:flex;align-items:center;justify-content:center;font-size:28px">🦅</div>
+            <div style="padding:6px;font-size:9px;text-align:center">
+              <div style="font-weight:700">Aigle royal</div>
+              <div style="color:#aaa">Rapace</div>
+            </div>
+          </div>
+          <div style="background:#292524;border-radius:10px;overflow:hidden;opacity:0.5">
+            <div style="height:60px;background:linear-gradient(135deg,#4c1d95,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:28px">🦆</div>
+            <div style="padding:6px;font-size:9px;text-align:center">
+              <div style="font-weight:700">Canard col-vert</div>
+              <div style="color:#aaa">Aquatique</div>
+            </div>
+          </div>
+          <div style="background:#292524;border-radius:10px;overflow:hidden;opacity:0.5">
+            <div style="height:60px;background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;font-size:28px">🦜</div>
+            <div style="padding:6px;font-size:9px;text-align:center">
+              <div style="font-weight:700">Rouge-gorge</div>
+              <div style="color:#aaa">Passereau</div>
+            </div>
+          </div>
+          <div style="background:#292524;border-radius:10px;overflow:hidden;opacity:0.5">
+            <div style="height:60px;background:linear-gradient(135deg,#1e3a5f,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:28px">🦢</div>
+            <div style="padding:6px;font-size:9px;text-align:center">
+              <div style="font-weight:700">Cygne tuberculé</div>
+              <div style="color:#aaa">Aquatique</div>
+            </div>
+          </div>
+          <div style="background:#292524;border-radius:10px;overflow:hidden;opacity:0.5">
+            <div style="height:60px;background:linear-gradient(135deg,#365314,#65a30d);display:flex;align-items:center;justify-content:center;font-size:28px">🦚</div>
+            <div style="padding:6px;font-size:9px;text-align:center">
+              <div style="font-weight:700">Pic vert</div>
+              <div style="color:#aaa">Grimpeur</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:8px 12px;font-size:9px;color:#666;text-align:center">● vu &nbsp;&nbsp; ○ non vu</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>Grille 3 colonnes, filtres par famille en chips horizontaux, recherche, indicateur vu/non vu.</p>
+    </div>
+  </div>
+
+  <div class="mockup" data-choice="b" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="mockup-header">B — Liste par famille avec accordéons</div>
+    <div class="mockup-body" style="padding:0">
+      <div style="background:#1c1917;min-height:380px;border-radius:8px;overflow:hidden;font-size:12px;color:white">
+        <!-- Header -->
+        <div style="background:#292524;padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #3d3532">
+          <div style="font-size:16px">←</div>
+          <div style="font-weight:700">Apprendre</div>
+        </div>
+        <!-- Search -->
+        <div style="padding:10px 12px">
+          <div style="background:#292524;border-radius:8px;padding:8px 12px;color:#666;font-size:11px">🔍 Rechercher...</div>
+        </div>
+        <!-- Sections -->
+        <div style="padding:0 12px;display:flex;flex-direction:column;gap:8px">
+          <!-- Open section -->
+          <div style="background:#292524;border-radius:10px;overflow:hidden">
+            <div style="padding:12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #3d3532">
+              <div style="font-size:20px">🐦</div>
+              <div>
+                <div style="font-weight:700">Passereaux</div>
+                <div style="color:#aaa;font-size:10px">142 espèces · 3 vues</div>
+              </div>
+              <div style="margin-left:auto">
+                <div style="background:#f59e0b22;color:#f59e0b;font-size:9px;border-radius:4px;padding:2px 6px">2%</div>
+              </div>
+              <div style="color:#f59e0b">▼</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0">
+              <div style="padding:10px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #3d353222">
+                <div style="width:36px;height:36px;background:linear-gradient(135deg,#1e40af,#3b82f6);border-radius:8px;display:flex;align-items:center;justify-content:center">🐦</div>
+                <div>
+                  <div style="font-size:11px;font-weight:600">Moineau domestique</div>
+                  <div style="font-size:9px;color:#aaa">Passer domesticus</div>
+                </div>
+                <div style="margin-left:auto;width:8px;height:8px;background:#22c55e;border-radius:50%"></div>
+              </div>
+              <div style="padding:10px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #3d353222">
+                <div style="width:36px;height:36px;background:linear-gradient(135deg,#7f1d1d,#dc2626);border-radius:8px;display:flex;align-items:center;justify-content:center">🦜</div>
+                <div>
+                  <div style="font-size:11px;font-weight:600">Rouge-gorge familier</div>
+                  <div style="font-size:9px;color:#aaa">Erithacus rubecula</div>
+                </div>
+                <div style="margin-left:auto;width:8px;height:8px;background:#374151;border-radius:50%"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Closed section -->
+          <div style="background:#292524;border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px">
+            <div style="font-size:20px">🦅</div>
+            <div>
+              <div style="font-weight:700">Rapaces</div>
+              <div style="color:#aaa;font-size:10px">48 espèces · 0 vues</div>
+            </div>
+            <div style="margin-left:auto;color:#555">▶</div>
+          </div>
+          <div style="background:#292524;border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px">
+            <div style="font-size:20px">🦆</div>
+            <div>
+              <div style="font-weight:700">Oiseaux aquatiques</div>
+              <div style="color:#aaa;font-size:10px">63 espèces · 0 vues</div>
+            </div>
+            <div style="margin-left:auto;color:#555">▶</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>Sections par famille, accordéon pour ouvrir. Progression visible par famille. Plus pédagogique.</p>
+    </div>
+  </div>
+
+</div>

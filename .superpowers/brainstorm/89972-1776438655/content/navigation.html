@@ -1,0 +1,73 @@
+<h2>Structure de navigation — Canari</h2>
+<p class="subtitle">Comment l'utilisateur navigue dans l'app ?</p>
+
+<div class="split">
+  <div class="mockup" data-choice="a" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="mockup-header">A — Tab Bar (bas de l'écran)</div>
+    <div class="mockup-body" style="padding:0">
+      <div style="background:#1a1a2e;min-height:320px;display:flex;flex-direction:column;border-radius:8px;overflow:hidden">
+        <!-- Screen content -->
+        <div style="flex:1;padding:20px;color:white;font-size:13px">
+          <div style="background:#f59e0b22;border-radius:12px;padding:16px;margin-bottom:12px">
+            <div style="font-size:24px;margin-bottom:4px">🐦</div>
+            <div style="font-weight:700;font-size:16px;color:#f59e0b">Canari</div>
+            <div style="color:#aaa;font-size:11px">Bienvenue !</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:#ffffff11;border-radius:8px;padding:12px;text-align:center">
+              <div>📚</div><div style="font-size:11px;margin-top:4px;color:#ddd">Apprendre</div>
+            </div>
+            <div style="background:#f59e0b33;border-radius:8px;padding:12px;text-align:center;border:1px solid #f59e0b55">
+              <div>🎯</div><div style="font-size:11px;margin-top:4px;color:#f59e0b">Quiz</div>
+            </div>
+          </div>
+        </div>
+        <!-- Tab bar -->
+        <div style="background:#111;border-top:1px solid #333;padding:8px 0;display:flex;justify-content:space-around">
+          <div style="text-align:center;color:#f59e0b;font-size:10px"><div>🏠</div>Accueil</div>
+          <div style="text-align:center;color:#666;font-size:10px"><div>📚</div>Apprendre</div>
+          <div style="text-align:center;color:#666;font-size:10px"><div>🎯</div>Quiz</div>
+          <div style="text-align:center;color:#666;font-size:10px"><div>🏆</div>Scores</div>
+          <div style="text-align:center;color:#666;font-size:10px"><div>👤</div>Profil</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>Navigation persistante en bas. Standard iOS/Android. Accès immédiat à toutes les sections.</p>
+    </div>
+  </div>
+
+  <div class="mockup" data-choice="b" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="mockup-header">B — Homepage avec cards + stack navigation</div>
+    <div class="mockup-body" style="padding:0">
+      <div style="background:#1a1a2e;min-height:320px;display:flex;flex-direction:column;border-radius:8px;overflow:hidden">
+        <!-- Hero -->
+        <div style="background:linear-gradient(135deg,#92400e,#f59e0b);padding:20px;text-align:center;color:white">
+          <div style="font-size:32px">🐤</div>
+          <div style="font-weight:800;font-size:20px;letter-spacing:2px">CANARI</div>
+          <div style="font-size:11px;opacity:0.8;margin-top:4px">Découvrez les oiseaux de France</div>
+        </div>
+        <!-- Cards -->
+        <div style="flex:1;padding:12px;display:flex;flex-direction:column;gap:8px">
+          <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;color:white">
+            <div style="font-size:28px">📚</div>
+            <div><div style="font-weight:700">Mode Apprentissage</div><div style="font-size:11px;opacity:0.7">Explorer les oiseaux</div></div>
+            <div style="margin-left:auto;opacity:0.5">›</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#7c2d12,#ea580c);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;color:white">
+            <div style="font-size:28px">🎯</div>
+            <div><div style="font-weight:700">Mode Quiz</div><div style="font-size:11px;opacity:0.7">10 questions · Teste-toi !</div></div>
+            <div style="margin-left:auto;opacity:0.5">›</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:#ffffff11;border-radius:10px;padding:10px;color:white;text-align:center;font-size:11px"><div>🏆</div>Classement</div>
+            <div style="background:#ffffff11;border-radius:10px;padding:10px;color:white;text-align:center;font-size:11px"><div>👤</div>Profil</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>Homepage immersive avec grandes cards. Navigation en stack (retour arrière). Plus visuel et impactant à l'ouverture.</p>
+    </div>
+  </div>
+</div>
