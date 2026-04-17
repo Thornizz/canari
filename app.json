@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Canari",
+    "slug": "canari",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "canari",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#1c1917"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.canari.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1c1917"
+      },
+      "package": "com.canari.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
