@@ -1,10 +1,10 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { quizSession } from "@/lib/quizSession";
+import { QUIZ_TOTAL } from "@/lib/quiz";
 import type { QuizQuestion } from "@/lib/types";
 
-const TOTAL = 10;
 const TIMER_SECONDS = 15;
 
 export default function QuizQuestionScreen() {
@@ -16,31 +16,7 @@ export default function QuizQuestionScreen() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [answered, setAnswered] = useState(false);
 
-  // Timer countdown
-  useEffect(() => {
-    if (answered) return;
-    if (timeLeft <= 0) {
-      handleAnswer(null); // timeout → faux
-      return;
-    }
-    const t = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
-    return () => clearTimeout(t);
-  }, [timeLeft, answered]);
-
-  // Auto-advance après réponse
-  useEffect(() => {
-    if (!answered) return;
-    const t = setTimeout(() => {
-      if (questionIndex < TOTAL - 1) {
-        router.replace(`/quiz/${questionIndex + 1}` as any);
-      } else {
-        router.replace("/quiz/resultats");
-      }
-    }, 1000);
-    return () => clearTimeout(t);
-  }, [answered]);
-
-  const handleAnswer = (idx: number | null) => {
+  const handleAnswer = useCallback((idx: number | null) => {
     if (answered) return;
     setAnswered(true);
     setSelectedIndex(idx);
@@ -50,7 +26,31 @@ export default function QuizQuestionScreen() {
       selectedIndex: idx,
       correct: idx === question.correctIndex,
     });
-  };
+  }, [answered, question]);
+
+  // Timer countdown
+  useEffect(() => {
+    if (answered) return;
+    if (timeLeft <= 0) {
+      handleAnswer(null);
+      return;
+    }
+    const t = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
+    return () => clearTimeout(t);
+  }, [timeLeft, answered, handleAnswer]);
+
+  // Auto-advance après réponse
+  useEffect(() => {
+    if (!answered) return;
+    const t = setTimeout(() => {
+      if (questionIndex < QUIZ_TOTAL - 1) {
+        router.replace({ pathname: "/quiz/[questionIndex]", params: { questionIndex: String(questionIndex + 1) } } as any);
+      } else {
+        router.replace("/quiz/resultats");
+      }
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [answered]);
 
   if (!question) {
     return (
@@ -70,7 +70,7 @@ export default function QuizQuestionScreen() {
           <Text className="text-stone-400 text-sm">
             Question{" "}
             <Text className="text-white font-bold">{questionIndex + 1}</Text>
-            <Text className="text-stone-500">/{TOTAL}</Text>
+            <Text className="text-stone-500">/{QUIZ_TOTAL}</Text>
           </Text>
           <Text className={`text-sm font-bold ${timeLeft <= 5 ? "text-red-400" : "text-amber-400"}`}>
             ⏱ {timeLeft}s
@@ -80,7 +80,7 @@ export default function QuizQuestionScreen() {
         <View className="h-1.5 bg-stone-800 rounded-full overflow-hidden">
           <View
             className="h-full bg-amber-500 rounded-full"
-            style={{ width: `${((questionIndex + 1) / TOTAL) * 100}%` }}
+            style={{ width: `${((questionIndex + 1) / QUIZ_TOTAL) * 100}%` }}
           />
         </View>
         {/* Barre timer */}

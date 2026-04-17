@@ -1,6 +1,8 @@
 import { allBirds } from "@/lib/birds";
 import type { QuizQuestion } from "@/lib/types";
 
+export const QUIZ_TOTAL = 10;
+
 /** Mélange un tableau en place (Fisher-Yates) et le retourne */
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -17,7 +19,7 @@ function shuffle<T>(arr: T[]): T[] {
  * complétés par des oiseaux d'autres familles si nécessaire.
  */
 export function generateQuiz(): QuizQuestion[] {
-  const selected = shuffle(allBirds).slice(0, 10);
+  const selected = shuffle(allBirds).slice(0, QUIZ_TOTAL);
 
   return selected.map((bird): QuizQuestion => {
     const sameFamily = allBirds.filter(
