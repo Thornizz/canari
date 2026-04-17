@@ -36,12 +36,13 @@ export default function ClassementScreen() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setCurrentUserId(session?.user.id ?? null);
-    });
-    loadLeaderboard();
+      const uid = session?.user.id ?? null;
+      setCurrentUserId(uid);
+      loadLeaderboard(uid);
+    }).catch(() => loadLeaderboard(null));
   }, []);
 
-  const loadLeaderboard = async () => {
+  const loadLeaderboard = async (uid: string | null) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -57,26 +58,27 @@ export default function ClassementScreen() {
       for (const row of data) {
         if (seen.has(row.user_id)) continue;
         seen.add(row.user_id);
-        const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+        const p = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+        const username =
+          p !== null && typeof p === "object" && "username" in p
+            ? String((p as { username: unknown }).username)
+            : "Anonyme";
         deduped.push({
           userId: row.user_id,
-          username: (profile as { username: string } | null)?.username ?? "Anonyme",
+          username,
           bestScore: row.score,
           lastPlayed: row.played_at,
         });
       }
 
-      const top20 = deduped.slice(0, 20);
-      setEntries(top20);
+      setEntries(deduped.slice(0, 20));
 
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        const uid = session?.user.id;
-        if (!uid) return;
+      if (uid) {
         const userIndex = deduped.findIndex((e) => e.userId === uid);
         if (userIndex >= 20) {
           setCurrentUserEntry({ ...deduped[userIndex], rank: userIndex + 1 });
         }
-      });
+      }
     } finally {
       setLoading(false);
     }

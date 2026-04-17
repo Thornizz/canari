@@ -185,6 +185,10 @@ function ConnectedProfile({ userId, onSignOut }: ConnectedProfileProps) {
         supabase.from("quiz_scores").select("id, user_id, score, played_at").eq("user_id", userId).order("played_at", { ascending: false }).limit(10),
       ]);
 
+      if (profileRes.error) console.error("[Profil] load profile:", profileRes.error);
+      if (badgesRes.error) console.error("[Profil] load badges:", badgesRes.error);
+      if (scoresRes.error) console.error("[Profil] load scores:", scoresRes.error);
+
       const { data: bestScoreRow } = await supabase
         .from("quiz_scores").select("score").eq("user_id", userId).order("score", { ascending: false }).limit(1).maybeSingle();
 
@@ -194,6 +198,8 @@ function ConnectedProfile({ userId, onSignOut }: ConnectedProfileProps) {
         scores: (scoresRes.data ?? []) as QuizScore[],
         bestScore: bestScoreRow?.score ?? null,
       });
+    } catch (e) {
+      console.error("[Profil] loadProfileData:", e);
     } finally {
       setLoading(false);
     }
@@ -315,7 +321,8 @@ export default function ProfilScreen() {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) console.error("[Profil] getSession:", error);
       setSession(session);
       setAuthChecked(true);
     });
