@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { allBirds, searchBirds, groupByFamily, familyProgress, FamilyGroup } from "@/lib/birds";
@@ -68,6 +68,13 @@ export default function ApprendreScreen() {
       .eq("user_id", uid);
     if (data) setSeenIds(new Set(data.map((r) => r.bird_id)));
   };
+
+  // Reload progress when navigating back from a bird detail screen
+  useFocusEffect(
+    useCallback(() => {
+      if (userId) loadProgress(userId);
+    }, [userId])
+  );
 
   const toggleFamily = useCallback((famille: string) => {
     setOpenFamilies((prev) => {

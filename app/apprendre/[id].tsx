@@ -28,11 +28,23 @@ export default function BirdDetailScreen() {
     if (!bird) return;
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) return;
-      markAsSeen(session.user.id, bird.id);
+      initSeen(session.user.id, bird.id);
     });
   }, [bird?.id]);
 
-  const markAsSeen = async (userId: string, birdId: string) => {
+  const initSeen = async (userId: string, birdId: string) => {
+    // Check if already seen (shows badge immediately for returning users)
+    const { data } = await supabase
+      .from("bird_progress")
+      .select("bird_id")
+      .eq("user_id", userId)
+      .eq("bird_id", birdId)
+      .maybeSingle();
+    if (data) {
+      setIsSeen(true);
+      return;
+    }
+    // Not seen yet — record it
     const { error } = await supabase.from("bird_progress").upsert(
       { user_id: userId, bird_id: birdId },
       { onConflict: "user_id,bird_id" }
