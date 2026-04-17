@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { quizSession } from "@/lib/quizSession";
-import { generateQuiz } from "@/lib/quiz";
+import { generateQuiz, QUIZ_TOTAL } from "@/lib/quiz";
 import { updateStreak } from "@/lib/streak";
 import { checkNewBadges, BADGE_DEFINITIONS } from "@/lib/badges";
 import type { QuizResult, BadgeKey, BadgeDefinition } from "@/lib/types";
@@ -17,6 +17,10 @@ export default function QuizResultatsScreen() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
+    if (results.length === 0) router.replace("/quiz");
+  }, []);
+
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) saveResults(session.user.id);
       else setSaved(true);
@@ -24,6 +28,7 @@ export default function QuizResultatsScreen() {
   }, []);
 
   const saveResults = async (userId: string) => {
+    try {
     // 1. Save score
     const { error: scoreError } = await supabase.from("quiz_scores").insert({ user_id: userId, score });
     if (scoreError) console.error("[QuizResultats] save score:", scoreError);
@@ -59,6 +64,10 @@ export default function QuizResultatsScreen() {
     }
 
     setSaved(true);
+    } catch (e) {
+      console.error("[QuizResultats] saveResults:", e);
+      setSaved(true);
+    }
   };
 
   const scoreColor = score >= 8 ? "#f59e0b" : score >= 5 ? "#3b82f6" : "#ef4444";
@@ -80,7 +89,7 @@ export default function QuizResultatsScreen() {
           >
             {score}
           </Text>
-          <Text className="text-stone-400 text-2xl mb-4">/10</Text>
+          <Text className="text-stone-400 text-2xl mb-4">/{QUIZ_TOTAL}</Text>
         </View>
         {streak > 0 && (
           <View className="bg-amber-500/20 border border-amber-500/40 rounded-full px-4 py-1.5">
