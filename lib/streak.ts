@@ -25,6 +25,7 @@ export async function updateStreak(
 
   if (!profile) return { newStreak: 1, previousStreak: 0, wasUpdatedToday: false };
 
+  // Dates comparées en UTC — cohérent avec le stockage Supabase (type `date` PostgreSQL)
   const today = new Date().toISOString().split("T")[0];
   const previousStreak = profile.streak_count ?? 0;
 
@@ -39,10 +40,12 @@ export async function updateStreak(
   const newStreak =
     profile.last_played_date === yesterdayStr ? previousStreak + 1 : 1;
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({ streak_count: newStreak, last_played_date: today })
     .eq("id", userId);
+
+  if (error) return { newStreak: previousStreak, previousStreak, wasUpdatedToday: false };
 
   return { newStreak, previousStreak, wasUpdatedToday: false };
 }
