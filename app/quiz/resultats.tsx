@@ -132,9 +132,11 @@ export default function QuizResultatsScreen() {
             Récapitulatif
           </Text>
           {results.map((result) => (
-            <View
+            <TouchableOpacity
               key={result.question.bird.id}
               className="flex-row items-center justify-between bg-stone-800 rounded-xl px-4 py-3"
+              onPress={() => router.push(`/apprendre/${result.question.bird.id}`)}
+              activeOpacity={0.75}
             >
               <View className="flex-1">
                 <Text className="text-white text-sm font-medium">
@@ -149,12 +151,15 @@ export default function QuizResultatsScreen() {
                   <Text className="text-stone-500 text-xs">Temps écoulé</Text>
                 )}
               </View>
-              <Text
-                className={`text-lg font-bold ${result.correct ? "text-emerald-400" : "text-red-400"}`}
-              >
-                {result.correct ? "✓" : "✗"}
-              </Text>
-            </View>
+              <View className="flex-row items-center gap-2">
+                <Text
+                  className={`text-lg font-bold ${result.correct ? "text-emerald-400" : "text-red-400"}`}
+                >
+                  {result.correct ? "✓" : "✗"}
+                </Text>
+                <Text className="text-stone-600 text-sm">›</Text>
+              </View>
+            </TouchableOpacity>
           ))}
         </View>
 
